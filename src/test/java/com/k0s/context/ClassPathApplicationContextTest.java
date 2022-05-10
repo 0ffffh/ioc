@@ -17,11 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClassPathApplicationContextTest {
 
 
-    @BeforeEach
-    void setUp() {
-
-    }
-
     @Test
     void getBean() {
         ClassPathApplicationContext context = new ClassPathApplicationContext("context.xml");
@@ -30,7 +25,7 @@ class ClassPathApplicationContextTest {
         MailService mailService = (MailService) context.getBean("mailServiceIMAP");
         assertNotNull(mailService);
         assertEquals("IMAP", mailService.getProtocol());
-        assertEquals(143, mailService.getPort());
+        assertEquals(286, mailService.getPort());
 
         User user = (User) context.getBean("user");
         assertNotNull(user);
@@ -44,14 +39,6 @@ class ClassPathApplicationContextTest {
         assertEquals("Ivan", user3.getName());
         assertEquals(20, user3.getAge());
 
-    }
-
-    @Test
-    void testGetBean() {
-    }
-
-    @Test
-    void testGetBean1() {
     }
 
 
@@ -82,7 +69,6 @@ class ClassPathApplicationContextTest {
     }
 
 
-//    @Test(expected = BeanInstantiationException.class)
     @Test()
     public void testCreateBeansWithWrongClass() {
 
@@ -131,7 +117,6 @@ class ClassPathApplicationContextTest {
         assertEquals(beanValue2, actualBeanValue2);
     }
 
-//    @Test(expected = NoUniqueBeanOfTypeException.class)
     @Test
     public void testGetBeanByClazzNoUniqueBean() {
         ClassPathApplicationContext classPathApplicationContext = new ClassPathApplicationContext();
@@ -162,7 +147,6 @@ class ClassPathApplicationContextTest {
     }
 
 
-//    @Test(expected = NoSuchBeanDefinitionException.class)
     @Test
     public void testGetBeanByIdAndClazzNoSuchBean() {
         ClassPathApplicationContext classPathApplicationContext = new ClassPathApplicationContext();
@@ -190,15 +174,10 @@ class ClassPathApplicationContextTest {
     }
 
 
-
-
-
-
-
     @Test
     public void testCreateBeansFromXML()  {
-        ClassPathApplicationContext genericApplicationContext = new ClassPathApplicationContext("context.xml");
-        Map<String, Bean> beanMap = genericApplicationContext.getBeanMap();
+        ClassPathApplicationContext classPathApplicationContext = new ClassPathApplicationContext("context.xml");
+        Map<String, Bean> beanMap = classPathApplicationContext.getBeanMap();
         System.out.println(beanMap.toString());
         Bean bean = beanMap.get("mailServicePOP");
         System.out.println(bean.getId());
@@ -210,19 +189,23 @@ class ClassPathApplicationContextTest {
         System.out.println(userService.getMailService().getClass());
 
         Bean bean2 = beanMap.get("userService");
-//        UserService userService1 =(UserService) bean2.getBeanObject();
-        UserService userService1 = genericApplicationContext.getBean("userService", DefaultUserService.class);
+        UserService userService1 = classPathApplicationContext.getBean("userService", DefaultUserService.class);
         userService1.activateUsers();
 
-        User user = (User) genericApplicationContext.getBean("user");
+        User user = (User) classPathApplicationContext.getBean("user");
         System.out.println(user.getClass());
         System.out.println(user.getName());
         System.out.println(user.getAge());
 
-        User user1 = (User) genericApplicationContext.getBean("user2");
-//        User user1 = genericApplicationContext.getBean(User.class);
+        User user1 = (User) classPathApplicationContext.getBean("user2");
         System.out.println(user1.getName());
         System.out.println(user1.getAge());
+
+        MailService mailService = (MailService) beanMap.get("mailServiceIMAP").getBeanInstance();
+        MailService mailService2 = (MailService) beanMap.get("mailServicePOP").getBeanInstance();
+
+        System.out.println(mailService.getPort());
+        System.out.println(mailService2.getPort());
 
     }
 }

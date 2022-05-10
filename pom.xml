@@ -6,12 +6,14 @@
 
     <groupId>com.k0s</groupId>
     <artifactId>ioc</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <logback.version>1.2.11</logback.version>
         <projectlombok.version>1.18.24</projectlombok.version>
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
@@ -38,7 +40,12 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>${reflections.version}</version>
-            <!--            <scope>compile</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
         </dependency>
 
         <!--        TEST-->

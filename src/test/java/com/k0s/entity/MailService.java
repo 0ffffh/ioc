@@ -2,10 +2,17 @@ package com.k0s.entity;
 
 
 import com.k0s.annotation.Autowired;
-import com.k0s.annotation.Service;
+import com.k0s.annotation.PostConstruct;
+import com.k0s.annotation.Component;
 import com.k0s.annotation.Inject;
-@Service(beanId = "mailServicePOP")
+
+import java.util.Properties;
+
+@Component(beanId = "mailServicePOP")
 public class MailService implements IMailService {
+    @Autowired
+    private Properties properties;
+
     @Autowired
     private User user;
     @Inject(value = "POP")
@@ -13,6 +20,8 @@ public class MailService implements IMailService {
     @Inject(value = "555")
     private int port;
 
+
+    @PostConstruct
     private void init() {
         port = port * 2;
         // make some initialization

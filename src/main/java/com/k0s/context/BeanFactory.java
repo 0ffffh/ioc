@@ -1,48 +1,65 @@
 package com.k0s.context;
 
 import com.k0s.annotation.Autowired;
-import com.k0s.annotation.Service;
+import com.k0s.annotation.Component;
 import com.k0s.annotation.Inject;
+import com.k0s.annotation.PostConstruct;
 import com.k0s.entity.Bean;
 import com.k0s.entity.BeanDefinition;
 import com.k0s.exception.CreateBeanException;
+import com.k0s.exception.NoUniqBeanException;
+import com.k0s.exception.PostConstructException;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class BeanFactory {
 
-    private final Map<Class, Object> interfaceToImplementation = new ConcurrentHashMap<>();
-
-
     private Reflections scanner;
+    private final Map<Class<?>, Object> interfaceToImplementation = new ConcurrentHashMap<>();
+
 
     public BeanFactory() {
     }
 
+
     public void createBeans(Map<String, Bean> beanMap, String basePackage) {
         this.scanner = new Reflections(basePackage);
-        Set<Class<?>> types = scanner.getTypesAnnotatedWith(Service.class);
+        Set<Class<?>> types = scanner.getTypesAnnotatedWith(Component.class);
         for (Class<?> clazz : types) {
-
-            Service service = clazz.getAnnotation(Service.class);
+            Component component = clazz.getAnnotation(Component.class);
             String beanId;
-            if (!service.beanId().isEmpty()) {
-                beanId = service.beanId();
+            if (!component.beanId().isEmpty()) {
+                beanId = component.beanId();
             } else {
                 beanId = getBeanId(clazz);
             }
             beanMap.put(beanId, new Bean(beanId, createBean(clazz)));
         }
+        log.info("Created {} beans: {}", beanMap.size(), beanMap.keySet());
+
+
+    }
+
+    public <T> T createBean(Class<T> clazz) {
+        T beanInstance = getBeanInstance(clazz);
+        injectAnnotatedValues(clazz, beanInstance);
+        injectAnnotatedRefs(clazz, beanInstance);
+        postConstruct(beanInstance);
+        return beanInstance;
     }
 
 
     public void createBeans(Map<String, Bean> beanMap, Map<String, BeanDefinition> beanDefinitions) {
         if (beanDefinitions.isEmpty()) {
+            log.info("BeanDefinition map is empty");
             throw new NoSuchElementException("BeanDefinition map is empty");
         }
         beanMap.putAll(beanDefinitions.entrySet().stream()
@@ -51,114 +68,23 @@ public class BeanFactory {
 
         injectValueDependencies(beanDefinitions, beanMap);
         injectRefDependencies(beanDefinitions, beanMap);
+        postConstruct(beanMap, beanDefinitions);
+        log.info("Created {} beans: {}", beanMap.size(), beanMap.keySet());
 
     }
-
 
     public Bean createBean(BeanDefinition beanDefinition) {
         Object classObject;
         try {
             Class<?> clazz = Class.forName(beanDefinition.getClassName());
-            classObject = createBean(clazz);
+            classObject = getBeanInstance(clazz);
         } catch (Exception e) {
+            log.info("Bean {} not created", beanDefinition.getClassName());
             throw new CreateBeanException("Can't create bean", e);
         }
         return new Bean(beanDefinition.getId(), classObject);
     }
 
-
-    public <T> T createBean(Class<T> clazz) {
-        System.out.println("===create bin===");
-        if (interfaceToImplementation.containsKey(clazz)) {
-            return clazz.cast(interfaceToImplementation.get(clazz));
-        }
-        T beanInstance = getBean(clazz);
-        interfaceToImplementation.put(clazz, beanInstance);
-        return beanInstance;
-//        recursive update
-//        return clazz.cast(interfaceToImplementation.computeIfAbsent(clazz, bean -> getBean(clazz)));
-    }
-
-    @SneakyThrows
-    public <T> T getBean(Class<T> clazz) {
-        System.out.println("===GET===");
-
-        Class<? extends T> implementationClass = clazz;
-
-        if (implementationClass.isInterface()) {
-            System.out.println(implementationClass.getName());
-            implementationClass = getImplementationClass(implementationClass);
-        }
-
-        T beanInstance = implementationClass.getDeclaredConstructor().newInstance();
-
-//        List<Field> reflist = Arrays.stream(implementationClass.getDeclaredFields())
-//                .filter(field -> field.isAnnotationPresent(Autowired.class)).toList();
-//
-//        for (Field field : reflist) {
-//            field.setAccessible(true);
-//            field.set(beanInstance, createBean((field.getType())));
-//        }
-
-
-//        List<Field> fieldList = Arrays.stream(implementationClass.getDeclaredFields())
-//                .filter(field -> field.isAnnotationPresent(Inject.class)).toList();
-//
-//        for (Field field : fieldList) {
-//            field.setAccessible(true);
-//            Optional<Inject> inject = Optional.ofNullable(field.getAnnotation(Inject.class));
-//            if (inject.isPresent()) {
-//                field.set(beanInstance, toObject(field.getType(), inject.get().value()));
-//            }
-//        }
-        injectAnnotatedValues(implementationClass, beanInstance);
-        injectAnnotatedRefs(implementationClass, beanInstance);
-        return beanInstance;
-    }
-
-    @SneakyThrows
-    private <T> void injectAnnotatedValues(Class<? extends T> implementationClass, T beanInstance) {
-        List<Field> fieldList = Arrays.stream(implementationClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Inject.class)).toList();
-
-        for (Field field : fieldList) {
-            field.setAccessible(true);
-            Optional<Inject> inject = Optional.ofNullable(field.getAnnotation(Inject.class));
-            if (inject.isPresent()) {
-                field.set(beanInstance, toObject(field.getType(), inject.get().value()));
-            }
-        }
-    }
-
-    @SneakyThrows
-    private <T> void injectAnnotatedRefs(Class<? extends T> implementationClass, T beanInstance) {
-        List<Field> reflist = Arrays.stream(implementationClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Autowired.class)).toList();
-
-        for (Field field : reflist) {
-            field.setAccessible(true);
-            field.set(beanInstance, createBean((field.getType())));
-        }
-    }
-
-    private String getBeanId(Class<?> clazz) {
-        String name = clazz.getName().substring(clazz.getPackageName().length() + 1);
-        String s1 = name.substring(0, 1).toLowerCase();
-        return s1 + name.substring(1);
-    }
-
-    private <T> Class<? extends T> getImplementationClass(Class<T> interfaceClass) {
-        Optional<Reflections> reflections = Optional.ofNullable(scanner);
-        if (reflections.isEmpty()) {
-            scanner = new Reflections(interfaceClass.getPackageName());
-        }
-
-        Set<Class<? extends T>> implementationClasses = scanner.getSubTypesOf(interfaceClass);
-        if (implementationClasses.size() != 1) {
-            throw new RuntimeException("Interface " + interfaceClass.getCanonicalName() + " has 0 or more then 1 realization");
-        }
-        return implementationClasses.stream().findFirst().get();
-    }
 
     void injectValueDependencies(Map<String, BeanDefinition> beanDefinitions, Map<String, Bean> beans) {
         beans.forEach((key, value) -> {
@@ -199,6 +125,104 @@ public class BeanFactory {
                 field.set(beanObject, beans.get(refDependencies.get(field.getName())).getBeanInstance());
             }
         }
+    }
+
+
+    private void postConstruct(Map<String, Bean> beanMap, Map<String, BeanDefinition> beanDefinitions) {
+        beanMap.forEach((key, value) -> {
+            if (beanDefinitions.containsKey(key)) {
+                Optional<String> initMethod = Optional.ofNullable(beanDefinitions.get(key).getInitMethod());
+                if (initMethod.isPresent()) {
+                    for (Method declaredMethod : value.getBeanInstance().getClass().getDeclaredMethods()) {
+                        if (declaredMethod.getName().equals(initMethod.get())) {
+                            try {
+                                declaredMethod.setAccessible(true);
+                                declaredMethod.invoke(value.getBeanInstance());
+                            } catch (Exception e) {
+                                throw new PostConstructException(declaredMethod.getName(), e);
+                            }
+                        }
+                    }
+                }
+
+            }
+        });
+    }
+
+
+    @SneakyThrows
+    private <T> T getBeanInstance(Class<T> clazz) {
+        if (interfaceToImplementation.containsKey(clazz)) {
+            return clazz.cast(interfaceToImplementation.get(clazz));
+        }
+
+        Class<? extends T> implementationClass = clazz;
+
+        if (implementationClass.isInterface()) {
+            implementationClass = getImplementationClass(implementationClass);
+        }
+
+        T beanInstance = implementationClass.getDeclaredConstructor().newInstance();
+        interfaceToImplementation.put(clazz, beanInstance);
+
+        return beanInstance;
+    }
+
+    @SneakyThrows
+    private <T> void injectAnnotatedValues(Class<? extends T> implementationClass, T beanInstance) {
+        List<Field> fieldList = Arrays.stream(implementationClass.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(Inject.class)).toList();
+
+        for (Field field : fieldList) {
+            field.setAccessible(true);
+            Optional<Inject> inject = Optional.ofNullable(field.getAnnotation(Inject.class));
+            if (inject.isPresent()) {
+                field.set(beanInstance, toObject(field.getType(), inject.get().value()));
+            }
+        }
+    }
+
+    @SneakyThrows
+    private <T> void injectAnnotatedRefs(Class<? extends T> implementationClass, T beanInstance) {
+        List<Field> reflist = Arrays.stream(implementationClass.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(Autowired.class)).toList();
+
+        for (Field field : reflist) {
+            field.setAccessible(true);
+            field.set(beanInstance, getBeanInstance((field.getType())));
+        }
+    }
+
+    private <T> void postConstruct(T beanInstance) {
+        for (Method declaredMethod : beanInstance.getClass().getDeclaredMethods()) {
+            if (declaredMethod.isAnnotationPresent(PostConstruct.class)) {
+                try {
+                    declaredMethod.setAccessible(true);
+                    declaredMethod.invoke(beanInstance);
+                } catch (Exception e) {
+                    throw new PostConstructException(declaredMethod.getName(), e);
+                }
+            }
+        }
+    }
+
+    private String getBeanId(Class<?> clazz) {
+        String name = clazz.getName().substring(clazz.getPackageName().length() + 1);
+        String s1 = name.substring(0, 1).toLowerCase();
+        return s1 + name.substring(1);
+    }
+
+    private <T> Class<? extends T> getImplementationClass(Class<T> interfaceClass) {
+        Optional<Reflections> reflections = Optional.ofNullable(scanner);
+        if (reflections.isEmpty()) {
+            scanner = new Reflections(interfaceClass.getPackageName());
+        }
+
+        Set<Class<? extends T>> implementationClasses = scanner.getSubTypesOf(interfaceClass);
+        if (implementationClasses.size() != 1) {
+            throw new NoUniqBeanException("Interface " + interfaceClass.getCanonicalName() + " has 0 or more then 1 realization");
+        }
+        return implementationClasses.stream().findFirst().get();
     }
 
     private static Object toObject(Class<?> clazz, String value) {

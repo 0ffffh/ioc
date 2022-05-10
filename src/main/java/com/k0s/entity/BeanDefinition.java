@@ -14,6 +14,7 @@ public class BeanDefinition {
     private String className;
     private Map<String, String> valueDependencies;
     private Map<String, String> refDependencies;
+    private String initMethod;
 
 
     public BeanDefinition(String id, String className) {

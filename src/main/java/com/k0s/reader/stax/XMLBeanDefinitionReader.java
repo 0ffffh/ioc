@@ -73,9 +73,12 @@ public class XMLBeanDefinitionReader implements BeanDefinitionReader {
             throw new ParseContextException("No specified class for bean");
         }
 
+        String initMethod = processor.getAttribute("init-method");
+
         return new BeanDefinition(id, clazzName,
                 new HashMap<>(1),
-                new HashMap<>(1));
+                new HashMap<>(1),
+                initMethod);
     }
 
     @SneakyThrows

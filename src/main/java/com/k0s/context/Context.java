@@ -6,7 +6,10 @@ import com.k0s.exception.NoUniqBeanException;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -46,7 +49,7 @@ public abstract class Context implements ApplicationContext {
                 return clazz.cast(bean.getBeanInstance());
             }
         }
-        throw new NoSuchBeanDefinitionException(id, clazz.getName(), beanMap.get(id).getBeanInstance().getClass().getName());
+        throw new NoSuchBeanDefinitionException(id, clazz.getName());
 
     }
 

@@ -17,9 +17,10 @@
         <property name="mailService" ref="mailServicePOP"/>
     </bean>
 
-    <bean id="mailServiceIMAP" class="com.k0s.entity.MailService">
+    <bean id="mailServiceIMAP" class="com.k0s.entity.MailService" init-method="init">
         <property name="port" value="143"/>
         <property name="protocol" value="IMAP"/>
+
     </bean>
 
     <bean id="user" class="com.k0s.entity.User"/>

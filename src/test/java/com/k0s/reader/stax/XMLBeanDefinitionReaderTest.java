@@ -11,17 +11,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class XMLBeanDefinitionReaderTest {
     private static final String CONTEXT_XML = "<beans>\n" +
-            "    <bean id=\"mailServicePOP\" class=\"com.study.entity.MailService\">\n" +
+            "    <bean id=\"mailServicePOP\" class=\"com.k0s.entity.MailService\">\n" +
             "        <property name=\"port\" value=\"995\"/>\n" +
             "        <property name=\"protocol\" value=\"POP3\"/>\n" +
             "    </bean>\n" +
             "        <property name=\"protocol\" value=\"POP3\"/>\n" +
             "\n" +
-            "    <bean id=\"userService\" class=\"com.study.entity.DefaultUserService\">\n" +
+            "    <bean id=\"userService\" class=\"com.k0s.entity.DefaultUserService\">\n" +
             "        <property name=\"mailService\" ref=\"mailServicePOP\"/>\n" +
             "    </bean>\n" +
             "\n" +
-            "    <bean id=\"mailServiceIMAP\" class=\"com.study.entity.MailService\">\n" +
+            "    <bean id=\"mailServiceIMAP\" class=\"com.k0s.entity.MailService\">\n" +
             "        <property name=\"port\" value=\"143\"/>\n" +
             "        <property name=\"protocol\" value=\"IMAP\"/>\n" +
             "    </bean>\n" +
@@ -37,7 +37,7 @@ class XMLBeanDefinitionReaderTest {
         assertEquals(3, beanDefinitionMap.size());
         BeanDefinition beanDefinition1 = beanDefinitionMap.get("mailServicePOP");
         assertEquals("mailServicePOP", beanDefinition1.getId());
-        assertEquals("com.study.entity.MailService", beanDefinition1.getClassName());
+        assertEquals("com.k0s.entity.MailService", beanDefinition1.getClassName());
 
         assertTrue(beanDefinition1.getRefDependencies().isEmpty());
         Map<String, String> valueDependencies1 = beanDefinition1.getValueDependencies();
@@ -49,7 +49,7 @@ class XMLBeanDefinitionReaderTest {
 
         BeanDefinition beanDefinition2 = beanDefinitionMap.get("userService");
         assertEquals("userService", beanDefinition2.getId());
-        assertEquals("com.study.entity.DefaultUserService", beanDefinition2.getClassName());
+        assertEquals("com.k0s.entity.DefaultUserService", beanDefinition2.getClassName());
 
         assertTrue(beanDefinition2.getValueDependencies().isEmpty());
         Map<String, String> refDependencies2 = beanDefinition2.getRefDependencies();
@@ -59,7 +59,7 @@ class XMLBeanDefinitionReaderTest {
 
         BeanDefinition beanDefinition3 = beanDefinitionMap.get("mailServiceIMAP");
         assertEquals("mailServiceIMAP", beanDefinition3.getId());
-        assertEquals("com.study.entity.MailService", beanDefinition3.getClassName());
+        assertEquals("com.k0s.entity.MailService", beanDefinition3.getClassName());
 
         assertTrue(beanDefinition3.getRefDependencies().isEmpty());
         Map<String, String> valueDependencies3 = beanDefinition3.getValueDependencies();

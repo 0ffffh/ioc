@@ -1,11 +1,11 @@
 package com.k0s.entity;
 
 import com.k0s.annotation.Autowired;
-import com.k0s.annotation.Service;
+import com.k0s.annotation.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-@Service(beanId = "userService")
+@Component(beanId = "userService")
 public class DefaultUserService implements UserService {
 
     @Autowired
