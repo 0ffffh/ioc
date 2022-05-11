@@ -1,9 +1,6 @@
 package com.k0s.context;
 
-import com.k0s.entity.Bean;
-import com.k0s.entity.DefaultUserService;
-import com.k0s.entity.MailService;
-import com.k0s.entity.User;
+import com.k0s.entity.*;
 import com.k0s.exception.NoSuchBeanDefinitionException;
 import org.junit.jupiter.api.Test;
 
@@ -19,8 +16,10 @@ class AnnotationApplicationContextTest {
     void getBean() {
         AnnotationApplicationContext context = new AnnotationApplicationContext("com.k0s");
 
+        UserService userService = (UserService) context.getBean("userService");
 
-        MailService mailService = (MailService) context.getBean("mailServicePOP");
+
+        MailService mailService = (MailService) context.getBean("mailService");
         assertNotNull(mailService);
         assertEquals("POP", mailService.getProtocol());
         assertEquals(1110, mailService.getPort());
@@ -54,9 +53,9 @@ class AnnotationApplicationContextTest {
 
         Map<String, Bean> beanMap = context.getBeanMap();
 
-        Bean actualMailBean = beanMap.get("mailServicePOP");
+        Bean actualMailBean = beanMap.get("mailService");
         assertNotNull(actualMailBean);
-        assertEquals("mailServicePOP", actualMailBean.getId());
+        assertEquals("mailService", actualMailBean.getId());
         assertEquals(MailService.class, actualMailBean.getBeanInstance().getClass());
 
         Bean actualUserBean = beanMap.get("userService");
@@ -81,7 +80,7 @@ class AnnotationApplicationContextTest {
         List<String> actualBeansNames = context.getBeanNames();
 
 
-        List<String> expectedBeansNames = Arrays.asList("mailServicePOP", "user", "userService");
+        List<String> expectedBeansNames = Arrays.asList("mailService", "user", "userService");
         assertTrue(actualBeansNames.containsAll(expectedBeansNames));
         assertTrue(expectedBeansNames.containsAll(actualBeansNames));
     }

@@ -2,6 +2,7 @@ package com.k0s.entity;
 
 import com.k0s.annotation.Autowired;
 import com.k0s.annotation.Component;
+import com.k0s.annotation.PostConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ public class DefaultUserService implements UserService {
     @Autowired
     private IMailService mailService;
 
+    @PostConstruct
     public void activateUsers() {
         System.out.println("Get users from db");
 

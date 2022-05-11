@@ -8,7 +8,7 @@ import com.k0s.annotation.Inject;
 
 import java.util.Properties;
 
-@Component(beanId = "mailServicePOP")
+@Component
 public class MailService implements IMailService {
     @Autowired
     private Properties properties;
@@ -30,7 +30,7 @@ public class MailService implements IMailService {
 
     @Override
     public void sendEmail(User user, String message) {
-        System.out.println("sending email with message: " + message + " to " + user.getName() + "protocol " + protocol);
+        System.out.println("sending email with message: " + message + " to " + user.getName() + " protocol " + protocol);
     }
 
     public void setProtocol(String protocol) {

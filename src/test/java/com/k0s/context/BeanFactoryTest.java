@@ -54,22 +54,16 @@ class BeanFactoryTest {
         assertEquals(DefaultUserService.class, actualUserBean.getBeanInstance().getClass());
     }
 
-    @Test
-    void createBeanFromAnnotation() {
-        User user = beanFactory.createBean(User.class);
-        assertEquals("Ivan", user.getName());
-        assertEquals(20, user.getAge());
 
-    }
 
     @Test
     void createBeansFromAnnotation() {
         Map<String, Bean> beanMap = new HashMap<>();
         beanFactory.createBeans(beanMap, "com.k0s");
 
-        Bean actualMailBean = beanMap.get("mailServicePOP");
+        Bean actualMailBean = beanMap.get("mailService");
         assertNotNull(actualMailBean);
-        assertEquals("mailServicePOP", actualMailBean.getId());
+        assertEquals("mailService", actualMailBean.getId());
         assertEquals(MailService.class, actualMailBean.getBeanInstance().getClass());
 
         Bean actualUserBean = beanMap.get("userService");
