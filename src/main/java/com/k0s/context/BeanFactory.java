@@ -189,8 +189,7 @@ public class BeanFactory {
 
         for (Field field : reflist) {
             field.setAccessible(true);
-//            field.set(beanInstance, getBeanInstance((field.getType())));
-            field.set(beanInstance, createBean((field.getType())));
+            field.set(beanInstance, getBeanInstance((field.getType())));
         }
     }
 
