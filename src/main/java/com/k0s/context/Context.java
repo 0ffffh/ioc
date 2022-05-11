@@ -57,4 +57,8 @@ public abstract class Context implements ApplicationContext {
     public List<String> getBeanNames() {
         return beanMap.keySet().stream().toList();
     }
+
+    public <T>void addBean(String id, T beanInstance){
+        beanMap.put(id, new Bean(id, beanInstance));
+    }
 }

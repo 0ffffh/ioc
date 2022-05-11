@@ -10,5 +10,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Inject {
     String value() default "";
-//    String value() default "";
 }

@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.reflections.Reflections;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -161,7 +162,6 @@ public class BeanFactory {
         if (implementationClass.isInterface()) {
             implementationClass = getImplementationClass(implementationClass);
         }
-
         T beanInstance = implementationClass.getDeclaredConstructor().newInstance();
         interfaceToImplementation.put(clazz, beanInstance);
 
@@ -189,7 +189,8 @@ public class BeanFactory {
 
         for (Field field : reflist) {
             field.setAccessible(true);
-            field.set(beanInstance, getBeanInstance((field.getType())));
+//            field.set(beanInstance, getBeanInstance((field.getType())));
+            field.set(beanInstance, createBean((field.getType())));
         }
     }
 

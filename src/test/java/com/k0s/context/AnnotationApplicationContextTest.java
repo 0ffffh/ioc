@@ -19,6 +19,7 @@ class AnnotationApplicationContextTest {
     void getBean() {
         AnnotationApplicationContext context = new AnnotationApplicationContext("com.k0s");
 
+
         MailService mailService = (MailService) context.getBean("mailServicePOP");
         assertNotNull(mailService);
         assertEquals("POP", mailService.getProtocol());
