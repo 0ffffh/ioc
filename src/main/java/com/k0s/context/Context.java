@@ -4,7 +4,6 @@ import com.k0s.entity.Bean;
 import com.k0s.exception.NoSuchBeanDefinitionException;
 import com.k0s.exception.NoUniqBeanException;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.List;
@@ -13,11 +12,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
+
 public abstract class Context implements ApplicationContext {
 
-    protected BeanFactory beanFactory;
+    @Getter
     protected final Map<String, Bean> beanMap = new ConcurrentHashMap<>();
 
 
@@ -32,9 +30,7 @@ public abstract class Context implements ApplicationContext {
     @Override
     public <T> T getBean(Class<T> clazz) {
         Set<Bean> beanSet = new HashSet<>(beanMap.values());
-        beanSet = beanSet.stream()
-                .filter(bean -> clazz.isAssignableFrom(bean.getBeanInstance().getClass()))
-                .collect(Collectors.toSet());
+        beanSet = beanSet.stream().filter(bean -> clazz.isAssignableFrom(bean.getBeanInstance().getClass())).collect(Collectors.toSet());
         if (beanSet.size() != 1) {
             throw new NoUniqBeanException(clazz.getName());
         }
@@ -58,7 +54,7 @@ public abstract class Context implements ApplicationContext {
         return beanMap.keySet().stream().toList();
     }
 
-    public <T>void addBean(String id, T beanInstance){
+    public <T> void addBean(String id, T beanInstance) {
         beanMap.put(id, new Bean(id, beanInstance));
     }
 }

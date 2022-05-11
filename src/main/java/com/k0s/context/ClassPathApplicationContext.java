@@ -1,10 +1,13 @@
 package com.k0s.context;
 
 
+import com.k0s.beanFactory.BeanFactory;
+import com.k0s.beanFactory.ClassPathBeanFactory;
 import com.k0s.entity.Bean;
 import com.k0s.entity.BeanDefinition;
 import com.k0s.reader.BeanDefinitionReader;
 import com.k0s.reader.stax.XMLBeanDefinitionReader;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -12,6 +15,9 @@ import java.util.Optional;
 
 @Slf4j
 public class ClassPathApplicationContext extends Context {
+    @Setter
+    protected ClassPathBeanFactory beanFactory;
+
 
     public ClassPathApplicationContext() {
     }
@@ -31,7 +37,7 @@ public class ClassPathApplicationContext extends Context {
         if (beanFactoryOptional.isPresent()) {
             beanFactory.createBeans(beanMap, beanDefinitions);
         } else {
-            beanFactory = new BeanFactory();
+            beanFactory = new ClassPathBeanFactory();
             beanFactory.createBeans(beanMap, beanDefinitions);
         }
 

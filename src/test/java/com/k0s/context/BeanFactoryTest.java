@@ -1,7 +1,8 @@
 package com.k0s.context;
 
+import com.k0s.beanFactory.AnnotationBeanFactory;
+import com.k0s.beanFactory.ClassPathBeanFactory;
 import com.k0s.entity.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -10,12 +11,12 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BeanFactoryTest {
-    private BeanFactory beanFactory;
-
-    @BeforeEach
-    void setUp() {
-        beanFactory = new BeanFactory();
-    }
+//    private BeanFactory beanFactory;
+//
+//    @BeforeEach
+//    void setUp() {
+//        beanFactory = new BeanFactory();
+//    }
 
     @Test
     void getBean() {
@@ -23,6 +24,7 @@ class BeanFactoryTest {
 
     @Test
     void createBeanFromDefinition() {
+        ClassPathBeanFactory beanFactory = new ClassPathBeanFactory();
         BeanDefinition beanDefinitionMailService = new BeanDefinition("mailServicePOP", "com.k0s.entity.MailService");
         Bean actualMailBean = beanFactory.createBean(beanDefinitionMailService);
 
@@ -33,6 +35,7 @@ class BeanFactoryTest {
 
     @Test
     void createBeansFromDefinition() {
+        ClassPathBeanFactory beanFactory = new ClassPathBeanFactory();
         Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
         BeanDefinition beanDefinitionMailService = new BeanDefinition("mailServicePOP", "com.k0s.entity.MailService");
         beanDefinitionMap.put("mailServicePOP", beanDefinitionMailService);
@@ -58,6 +61,8 @@ class BeanFactoryTest {
 
     @Test
     void createBeansFromAnnotation() {
+        AnnotationBeanFactory beanFactory = new AnnotationBeanFactory();
+
         Map<String, Bean> beanMap = new HashMap<>();
         beanFactory.createBeans(beanMap, "com.k0s");
 
@@ -75,6 +80,8 @@ class BeanFactoryTest {
 
     @Test
     public void testInjectValueDependencies() {
+        ClassPathBeanFactory beanFactory = new ClassPathBeanFactory();
+
         Map<String, Bean> beanMap = new HashMap<>();
         Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 
@@ -108,6 +115,8 @@ class BeanFactoryTest {
 
     @Test
     public void testInjectRefDependencies() {
+        ClassPathBeanFactory beanFactory = new ClassPathBeanFactory();
+
         Map<String, Bean> beanMap = new HashMap<>();
         Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 

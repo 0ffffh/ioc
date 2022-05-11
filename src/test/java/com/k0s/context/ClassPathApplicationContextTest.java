@@ -1,10 +1,10 @@
 package com.k0s.context;
 
+import com.k0s.beanFactory.ClassPathBeanFactory;
 import com.k0s.entity.*;
 import com.k0s.exception.CreateBeanException;
 import com.k0s.exception.NoSuchBeanDefinitionException;
 import com.k0s.exception.NoUniqBeanException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -21,7 +21,7 @@ class ClassPathApplicationContextTest {
     void getBean() {
         ClassPathApplicationContext context = new ClassPathApplicationContext("context.xml");
 
-        context.setBeanFactory(new BeanFactory());
+        context.setBeanFactory(new ClassPathBeanFactory());
 
         MailService mailService = (MailService) context.getBean("mailServiceIMAP");
         assertNotNull(mailService);

@@ -1,11 +1,17 @@
 package com.k0s.context;
 
+import com.k0s.beanFactory.AnnotationBeanFactory;
+import com.k0s.beanFactory.BeanFactory;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
 @Slf4j
 public class AnnotationApplicationContext extends Context {
+    @Setter
+    protected AnnotationBeanFactory beanFactory;
+
 
     public AnnotationApplicationContext() {
     }
@@ -20,11 +26,10 @@ public class AnnotationApplicationContext extends Context {
         if (beanFactoryOptional.isPresent()) {
             beanFactory.createBeans(beanMap, basePackage);
         } else {
-            beanFactory = new BeanFactory();
+            beanFactory = new AnnotationBeanFactory();
             beanFactory.createBeans(beanMap, basePackage);
         }
 
     }
-
 
 }
