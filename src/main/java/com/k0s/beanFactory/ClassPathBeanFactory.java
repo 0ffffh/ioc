@@ -15,10 +15,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ClassPathBeanFactory extends BeanFactory{
+public class ClassPathBeanFactory extends FactoryBean {
     public ClassPathBeanFactory() {
     }
 
+    @Override
     public void createBeans(Map<String, Bean> beanMap, Map<String, BeanDefinition> beanDefinitions) {
         if (beanDefinitions.isEmpty()) {
             log.info("BeanDefinition map is empty");
@@ -33,24 +34,22 @@ public class ClassPathBeanFactory extends BeanFactory{
 
     }
 
-    public Bean createBean(BeanDefinition beanDefinition) {
-        Object classObject;
-        try {
-            Class<?> clazz = Class.forName(beanDefinition.getClassName());
-            classObject = createBean(clazz);
-        } catch (Exception e) {
-            log.info("Bean {} not created", beanDefinition.getClassName());
-            throw new CreateBeanException("Can't create bean", e);
-        }
-        return new Bean(beanDefinition.getId(), classObject);
-    }
-
 
     public void injectValueDependencies(Map<String, BeanDefinition> beanDefinitions, Map<String, Bean> beans) {
         beans.forEach((key, value) -> {
             if (beanDefinitions.containsKey(key)) {
                 Optional<Map<String, String>> valueDependencies = Optional.ofNullable(beanDefinitions.get(key).getValueDependencies());
                 valueDependencies.ifPresent(valuesMap -> injectValueDependenciesBean(value.getBeanInstance(), valuesMap));
+            }
+        });
+    }
+
+
+    public void injectRefDependencies(Map<String, BeanDefinition> beanDefinitions, Map<String, Bean> beans) {
+        beans.forEach((key, value) -> {
+            if (beanDefinitions.containsKey(key)) {
+                Optional<Map<String, String>> refDependencies = Optional.ofNullable(beanDefinitions.get(key).getRefDependencies());
+                refDependencies.ifPresent(refsMap -> injectRefDependenciesBean(value.getBeanInstance(), refsMap, beans));
             }
         });
     }
@@ -63,15 +62,6 @@ public class ClassPathBeanFactory extends BeanFactory{
                 field.set(beanObject, toObject(field.getType(), valueDependencies.get(field.getName())));
             }
         }
-    }
-
-    public void injectRefDependencies(Map<String, BeanDefinition> beanDefinitions, Map<String, Bean> beans) {
-        beans.forEach((key, value) -> {
-            if (beanDefinitions.containsKey(key)) {
-                Optional<Map<String, String>> refDependencies = Optional.ofNullable(beanDefinitions.get(key).getRefDependencies());
-                refDependencies.ifPresent(refsMap -> injectRefDependenciesBean(value.getBeanInstance(), refsMap, beans));
-            }
-        });
     }
 
     @SneakyThrows
@@ -105,7 +95,5 @@ public class ClassPathBeanFactory extends BeanFactory{
             }
         });
     }
-
-
 
 }

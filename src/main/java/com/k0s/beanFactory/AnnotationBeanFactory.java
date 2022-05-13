@@ -15,13 +15,14 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 @Slf4j
-public class AnnotationBeanFactory extends BeanFactory {
+public class AnnotationBeanFactory extends FactoryBean {
 
 
     public AnnotationBeanFactory() {
     }
 
 
+    @Override
     public void createBeans(Map<String, Bean> beanMap, String basePackage) {
         super.scanner = new Reflections(basePackage);
         Set<Class<?>> types = scanner.getTypesAnnotatedWith(Component.class);
@@ -41,24 +42,6 @@ public class AnnotationBeanFactory extends BeanFactory {
         log.info("Created {} beans: {}", beanMap.size(), beanMap.keySet());
 
 
-    }
-
-
-    @SneakyThrows
-    public <T> T createBean(Class<T> clazz) {
-        if (interfaceToImplementation.containsKey(clazz)) {
-            return clazz.cast(interfaceToImplementation.get(clazz));
-        }
-
-        Class<? extends T> implementationClass = clazz;
-
-        if (implementationClass.isInterface()) {
-            implementationClass = super.getImplementationClass(implementationClass);
-        }
-        T beanInstance = implementationClass.getDeclaredConstructor().newInstance();
-        interfaceToImplementation.put(clazz, beanInstance);
-
-        return beanInstance;
     }
 
 

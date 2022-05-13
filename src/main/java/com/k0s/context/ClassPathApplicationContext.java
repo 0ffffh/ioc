@@ -1,7 +1,6 @@
 package com.k0s.context;
 
 
-import com.k0s.beanFactory.BeanFactory;
 import com.k0s.beanFactory.ClassPathBeanFactory;
 import com.k0s.entity.Bean;
 import com.k0s.entity.BeanDefinition;
