@@ -21,7 +21,7 @@ class ClassPathApplicationContextTest {
     void getBean() {
         ClassPathApplicationContext context = new ClassPathApplicationContext("context.xml");
 
-        context.setBeanFactory(new ClassPathBeanFactory());
+//        context.setBeanFactory(new ClassPathBeanFactory());
 
         MailService mailService = (MailService) context.getBean("mailServiceIMAP");
         assertNotNull(mailService);
